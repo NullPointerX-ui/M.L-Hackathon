@@ -5,6 +5,14 @@ Run: python -m scripts.build_features
 """
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_ROOT = _Path(__file__).resolve().parents[1]
+for _p in (_ROOT, _ROOT / "src"):  # also allow `python scripts/<name>.py` from any folder
+    if str(_p) not in _sys.path:
+        _sys.path.insert(0, str(_p))
+
 import json
 import logging
 import time
@@ -59,7 +67,11 @@ def main():
         info[f"R{R:.0f}"] = {p: dict(miss_rate=r, missed=k, reliable_points=n) for p, (r, k, n) in rates.items()}
         if max(r for r, _, _ in rates.values()) <= 0.05:
             break
-        print("miss rate > 5% -> raising R to 75 m")
+        if R < 75.0:
+            print("miss rate > 5% -> raising R to 75 m")
+        else:
+            print("miss rate still > 5% at R=75 m (the maximum) -> keeping 75 m; remaining misses are points far "
+                  "from their label arc (label noise), not a radius problem - see ROUND1_SUMMARY.md")
     info["R_used"], info["K"] = R, candidates.K_DEFAULT
     for p, (df, lab) in res.items():
         df[COLS].to_parquet(OUT / f"{p}_feats.parquet", index=False)

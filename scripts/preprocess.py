@@ -5,6 +5,14 @@ Run: python -m scripts.preprocess
 """
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_ROOT = _Path(__file__).resolve().parents[1]
+for _p in (_ROOT, _ROOT / "src"):  # also allow `python scripts/<name>.py` from any folder
+    if str(_p) not in _sys.path:
+        _sys.path.insert(0, str(_p))
+
 import logging
 import traceback
 
@@ -108,7 +116,7 @@ def main():
                 invalid=("invalid_coords", "sum"), nonmono=("non_monotonic_ts", "sum"),
                 route_disconnected=("route_connected", lambda s: int((~s).sum())),
                 route_repeats=("route_repeats", "sum")).to_string())
-    print("UTM EPSG codes:", sorted(inv.epsg.unique()))
+    print(f"UTM zones: {inv.epsg.nunique()} distinct EPSG codes:", ", ".join(str(int(e)) for e in sorted(inv.epsg.unique())))
     print("failures:", fails or "none")
 
 
