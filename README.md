@@ -48,6 +48,21 @@ data/raw/train/00000002/...
 data/raw/student_test/00000000/...                                    10 trip folders
 ```
 
+Copy it in with **one** of these. Replace the path with wherever your copy is. The source must contain the
+`train` and `student_test` folders.
+
+```powershell
+# a) you have a folder (e.g. from a shared drive or a teammate) that contains train\ and student_test\
+New-Item -ItemType Directory -Force data\raw | Out-Null
+Copy-Item -Recurse "C:\path\to\dataset\train", "C:\path\to\dataset\student_test" data\raw\
+
+# b) you have a zip: extract it, then copy the train\ and student_test\ folders as in (a)
+Expand-Archive "C:\path\to\dataset.zip" -DestinationPath tmp_data
+Get-ChildItem tmp_data -Recurse -Directory -Filter train   # shows where train\ ended up inside the zip
+```
+
+`tmp_data/` is gitignored, so the extracted zip won't be committed. Delete it once the copy is done.
+
 Check it:
 
 ```powershell
