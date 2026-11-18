@@ -42,3 +42,28 @@ Round 1 state is tagged `round1-demo`; Round 1 outputs are untouched; Round 2 ou
   inference 540 vs 18.7 ms / 1k points.
 - Rule (CV Top-1) selects TUNED for the HMM. Note: the CV gain (+0.0007) is well inside the fold std (0.014) and tuned is
   29x slower; student_test was not used to choose.
+
+## Phase 5 - HMM + Viterbi (done)
+- `src/pathsnap/hmm/` (lattice of network distances via bounded Dijkstra on a 400 m road subgraph, cached in
+  data/processed/r2/hmm_cache; Viterbi in log space with break/restart). Toy tests: `tests/test_viterbi.py`.
+- Emissions: train = out-of-fold (GroupKFold 5) probabilities; student_test = model refit on all eligible train rows.
+- Decoder params tuned by Optuna TPE (25 trials) on TRAIN only (LightGBM OOF): tau 1.38, beta 22.8, v_max 75 m/s
+  (`results/r2/hmm_params.json`, `hmm_trials.csv`).
+- `results/r2/hmm_comparison.csv` (Top-1 on eligible points, classifier -> HMM):
+  XGBoost train-OOF 0.9131 -> 0.9292 (decoder tuned on train); student_test 0.8984 -> 0.9060.
+  LightGBM train-OOF 0.9143 -> 0.9283; student_test 0.8944 -> 0.9021.
+  All points (XGBoost, student_test): 0.7986 -> 0.8088. Route F1 0.908 -> 0.933; continuity 0.796 -> 0.900.
+- Selection (pre-registered: contenders within 0.005 decided after HMM on train OOF): XGBoost (0.9292 vs 0.9283).
+  Deviations: RandomForest not decoded (time); decoder params tuned on LightGBM OOF and shared with XGBoost.
+- HMM hurt on some train trips (e.g. 00000079: 0.961 -> 0.837); 535 breaks on train (315 of them in low_quality
+  trip 00000054), 7 on student_test. See `results/r2/hmm_per_trip.csv`.
+
+## Phase 6/7 - inference + API (done)
+- `src/pathsnap/inference.py` (`Predictor.predict_trip`, reads only .track/.nodes/.arcs); no-label-import test passes.
+- Artifacts `artifacts/r2/`: xgb_selected.json (XGBoost refit on all eligible train rows), feature_spec.json,
+  hmm_config.json, versions.json. Largest trip (19,313 points) 13.1 s; all 10 student_test trips <= 1.0 s
+  (`results/r2/inference_check.csv`).
+- API = teammate's FastAPI skeleton (branch api-ui, files api/ ui/ tools/) with the dummy block replaced by
+  predict_trip + separate evaluator `pathsnap.eval.server_eval` (only server code that reads .route; returns aggregates).
+  JSON errors, model loaded at startup, structured log line per request. `tests/test_api_smoke.py` passes.
+- UI (Streamlit, teammate's ui/app.py extended): HMM / classifier-only / confidence-coloured GPS layers, metric cards, session table.
