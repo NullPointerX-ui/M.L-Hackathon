@@ -227,6 +227,13 @@ artifacts/r2/           xgb_selected.json, feature_spec.json, hmm_config.json, v
 results/r2/ reports/figures/r2/ maps/r2/   all Round 2 outputs (Round 1 outputs untouched; tag round1-demo)
 ```
 
-- [Round 2 Summary](results/r2/ROUND2_SUMMARY.md)
-- [Round 2 Findings](results/r2/FINDINGS.md)
 
+
+
+
+
+- [Round 2 Summary][r2summary]
+- [Round 2 Findings][r2findings]
+
+[r2summary]: results/r2/ROUND2_SUMMARY.md
+[r2findings]: results/r2/FINDINGS.md
