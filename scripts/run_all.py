@@ -24,6 +24,7 @@ STEPS = [
     ("1. preprocess + inventory + map", "scripts.preprocess"),
     ("2. label alignment", "scripts.make_labels"),
     ("3. candidates + features", "scripts.build_features"),
+    ("3b. EDA + feature figures", "scripts.eda_plots"),
     ("4. train + compare models", "scripts.train_models"),
     ("5. summary", "scripts.write_summary"),
 ]
