@@ -11,3 +11,4 @@ xgboost==3.4.1
 matplotlib==3.11.2
 folium==1.0.0
 pytest==9.2.0
+optuna==5.1.0

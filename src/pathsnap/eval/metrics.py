@@ -25,3 +25,18 @@ def argmax_per_point(df: pd.DataFrame, score: np.ndarray) -> pd.DataFrame:
 
 def top1(df: pd.DataFrame, score: np.ndarray) -> float:
     return float(argmax_per_point(df, score).correct.mean()) if len(df) else float("nan")
+
+
+def route_continuity(pred: pd.DataFrame, arcs_by_trip: dict, seg_by_trip: dict) -> float:
+    """Share of consecutive predicted-arc CHANGES (same trip, same gap-free segment, consecutive
+    point_idx) where the new arc starts at the node where the previous arc ends. Uses only the road
+    graph and the predictions, no ground truth. pred needs trip_id, point_idx, pred_arc."""
+    ok = tot = 0
+    for tid, g in pred.sort_values(["trip_id", "point_idx"]).groupby("trip_id"):
+        arcs, seg = arcs_by_trip[tid], seg_by_trip[tid]
+        pi, pa = g.point_idx.to_numpy(), g.pred_arc.to_numpy()
+        m = (np.diff(pi) == 1) & (seg[pi[1:]] == seg[pi[:-1]]) & (pa[1:] != pa[:-1])
+        a0, a1 = pa[:-1][m], pa[1:][m]
+        tot += int(m.sum())
+        ok += int((arcs[a0, 1] == arcs[a1, 0]).sum())
+    return ok / tot if tot else float("nan")
