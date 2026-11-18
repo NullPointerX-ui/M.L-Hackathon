@@ -25,7 +25,7 @@ cd M.L-Hackathon
 
 ```powershell
 py -3.12 -m venv .venv
-.venv\Scripts\Activate.ps1
+.venvScriptsActivate.ps1
 python -m pip install -r requirements.txt
 ```
 
@@ -53,13 +53,13 @@ Copy it in with **one** of these. Replace the path with wherever your copy is. T
 `train` and `student_test` folders.
 
 ```powershell
-# a) you have a folder (e.g. from a shared drive or a teammate) that contains train\ and student_test\
-New-Item -ItemType Directory -Force data\raw | Out-Null
-Copy-Item -Recurse "C:\path\to\dataset\train", "C:\path\to\dataset\student_test" data\raw\
+# a) you have a folder (e.g. from a shared drive or a teammate) that contains train and student_test
+New-Item -ItemType Directory -Force dataraw | Out-Null
+Copy-Item -Recurse "C:pathtodatasettrain", "C:pathtodatasetstudent_test" dataraw
 
-# b) you have a zip: extract it, then copy the train\ and student_test\ folders as in (a)
-Expand-Archive "C:\path\to\dataset.zip" -DestinationPath tmp_data
-Get-ChildItem tmp_data -Recurse -Directory -Filter train   # shows where train\ ended up inside the zip
+# b) you have a zip: extract it, then copy the train and student_test folders as in (a)
+Expand-Archive "C:pathtodataset.zip" -DestinationPath tmp_data
+Get-ChildItem tmp_data -Recurse -Directory -Filter train   # shows where train ended up inside the zip
 ```
 
 `tmp_data/` is gitignored, so the extracted zip won't be committed. Delete it once the copy is done.
@@ -67,38 +67,38 @@ Get-ChildItem tmp_data -Recurse -Directory -Filter train   # shows where train\ 
 Check it:
 
 ```powershell
-(Get-ChildItem data\raw\train -Directory).Count          # 80
-(Get-ChildItem data\raw\student_test -Directory).Count   # 10
+(Get-ChildItem datarawtrain -Directory).Count          # 80
+(Get-ChildItem datarawstudent_test -Directory).Count   # 10
 ```
 
 ### 4. Check that everything works
 
 ```powershell
 python -m pytest -q tests        # expect: 2 passed
-python scripts\demo.py --no-open # prints the committed Round 1 results (works even before step 3)
+python scriptsdemo.py --no-open # prints the committed Round 1 results (works even before step 3)
 ```
 
 ---
 
 ## Running the pipeline
 
-Run from the repo root with the venv active. Both forms work: `python scripts\<name>.py` and `python -m scripts.<name>`.
+Run from the repo root with the venv active. Both forms work: `python scripts<name>.py` and `python -m scripts.<name>`.
 
 | Command | What it does | Time |
 |---|---|---|
-| `python scripts\run_all.py --skip-train` | Steps 1, 2, 3, 5: rebuild data, labels and features; reuse committed model results | ~1.5 min |
-| `python scripts\run_all.py` | Everything, including training all 6 models | ~12 min |
-| `python scripts\demo.py` | Print Round 1 numbers, open the map and figures | 10 s |
+| `python scriptsrun_all.py --skip-train` | Steps 1, 2, 3, 5: rebuild data, labels and features; reuse committed model results | ~1.5 min |
+| `python scriptsrun_all.py` | Everything, including training all 6 models | ~12 min |
+| `python scriptsdemo.py` | Print Round 1 numbers, open the map and figures | 10 s |
 
 Individual steps, in order (each depends on the previous one):
 
 | Step | Command | Writes |
 |---|---|---|
-| 1. Load, project, quality checks, map | `python scripts\preprocess.py` | `results/eda/inventory.csv`, `maps/trip_00000001_raw.html`, `data/processed/points_*.parquet` |
-| 2. Per-point labels (monotonic DP) | `python scripts\make_labels.py` | `data/processed/labels_*.parquet`, `results/eda/label_*.{csv,json}` |
-| 3. Candidates + features | `python scripts\build_features.py` | `data/processed/*_feats.parquet`, `results/eda/candidates.json` |
-| 4. Train + compare models | `python scripts\train_models.py` | `results/model_comparison.csv`, `results/experiments.csv`, `reports/figures/*.png` |
-| 5. Summary | `python scripts\write_summary.py` | `results/ROUND1_SUMMARY.md` |
+| 1. Load, project, quality checks, map | `python scriptspreprocess.py` | `results/eda/inventory.csv`, `maps/trip_00000001_raw.html`, `data/processed/points_*.parquet` |
+| 2. Per-point labels (monotonic DP) | `python scriptsmake_labels.py` | `data/processed/labels_*.parquet`, `results/eda/label_*.{csv,json}` |
+| 3. Candidates + features | `python scriptsbuild_features.py` | `data/processed/*_feats.parquet`, `results/eda/candidates.json` |
+| 4. Train + compare models | `python scriptstrain_models.py` | `results/model_comparison.csv`, `results/experiments.csv`, `reports/figures/*.png` |
+| 5. Summary | `python scriptswrite_summary.py` | `results/ROUND1_SUMMARY.md` |
 
 Notes:
 
@@ -107,7 +107,7 @@ Notes:
 - **Re-running step 4 appends a row set to `results/experiments.csv`** (that file is the experiment log).
   Don't commit a re-run unless you mean to record a new experiment.
 - **The map shows as modified after every run.** Folium uses random element IDs, so the file changes even
-  though the map is identical. Discard it with `git checkout -- maps\trip_00000001_raw.html`.
+  though the map is identical. Discard it with `git checkout -- mapstrip_00000001_raw.html`.
 - Seeds are fixed (42). With the same data and package versions, steps 1 to 3 reproduce the committed
   results exactly.
 
@@ -173,9 +173,9 @@ Step-by-step log of decisions and numbers: [PROGRESS.md](PROGRESS.md). Figures: 
 ### Reproduce
 
 ```powershell
-python scripts\run_all.py --skip-train     # Round 1 data steps (labels, candidates, features)
-python scripts\run_all_r2.py --quick       # Round 2: labels v2, features v2, HMM, artifacts, maps (~8 min)
-python scripts\run_all_r2.py               # everything incl. ablation, model comparison, HPO (~45 min)
+python scriptsrun_all.py --skip-train     # Round 1 data steps (labels, candidates, features)
+python scriptsrun_all_r2.py --quick       # Round 2: labels v2, features v2, HMM, artifacts, maps (~8 min)
+python scriptsrun_all_r2.py               # everything incl. ablation, model comparison, HPO (~45 min)
 python -m pytest -q tests                  # geometry, alignment, Viterbi (incl. break/restart), no-label-import, API smoke
 ```
 
@@ -184,9 +184,9 @@ python -m pytest -q tests                  # geometry, alignment, Viterbi (incl.
 **Laptop 1 (API).** The model is loaded once at startup; ground truth stays on this laptop.
 
 ```powershell
-.venv\Scripts\Activate.ps1
+.venvScriptsActivate.ps1
 python -m pip install -r requirements.txt -r requirements-api.txt
-python api\main.py --eval-dir data\raw\student_test --port 8000     # evaluators: --eval-dir <their folder>
+python apimain.py --eval-dir datarawstudent_test --port 8000     # evaluators: --eval-dir <their folder>
 ```
 
 1. Find this laptop's IPv4 on the shared network: `ipconfig` (use the hotspot/Wi-Fi adapter's address).
@@ -199,12 +199,12 @@ python api\main.py --eval-dir data\raw\student_test --port 8000     # evaluators
 
 ```powershell
 python -m pip install -r requirements-ui.txt
-streamlit run ui\app.py
+streamlit run uiapp.py
 ```
 
 In the sidebar set **API base URL** to `http://<laptop-1-IP>:8000`, press **Check API**, pick a trip, **Run prediction**.
 Map layers: HMM route (purple), classifier-only route (dashed, toggle), GPS points coloured by confidence.
-If it can't connect: `python tools\smoke_test.py http://<laptop-1-IP>:8000` from laptop 2, and `ping <laptop-1-IP>`
+If it can't connect: `python toolssmoke_test.py http://<laptop-1-IP>:8000` from laptop 2, and `ping <laptop-1-IP>`
 (phone hotspots with client isolation block laptop-to-laptop traffic).
 
 API: `GET /health`, `GET /trips`, `POST /predict {"trip_id": "..."}` -> GeoJSON (raw GPS, HMM route, classifier-only route,
@@ -226,3 +226,7 @@ scripts/r2_*.py         one script per step; run_all_r2.py runs them in order
 artifacts/r2/           xgb_selected.json, feature_spec.json, hmm_config.json, versions.json
 results/r2/ reports/figures/r2/ maps/r2/   all Round 2 outputs (Round 1 outputs untouched; tag round1-demo)
 ```
+
+- [Round 2 Summary](results/r2/ROUND2_SUMMARY.md)
+- [Round 2 Findings](results/r2/FINDINGS.md)
+
