@@ -28,3 +28,5 @@ artifacts/*.joblib.tmp
 Thumbs.db
 .vscode/
 .idea/
+CLAUDE.md
+.claude/
