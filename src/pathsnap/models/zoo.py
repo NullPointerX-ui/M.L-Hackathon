@@ -76,10 +76,15 @@ def fit_mlp(X, y, g, pk):
                                          random_state=SEED)).fit(X, y))
 
 
-def fit_lgbm(X, y, g, pk):
+LGBM_DEFAULTS = dict(n_estimators=500, learning_rate=0.05, num_leaves=63, subsample=0.8, subsample_freq=1,
+                     colsample_bytree=0.8)
+
+
+def fit_lgbm(X, y, g, pk, **params):
+    """Untuned config by default; keyword params (e.g. from HPO) override LGBM_DEFAULTS."""
     tr, va = _holdout(g)
-    m = lgb.LGBMClassifier(n_estimators=500, learning_rate=0.05, num_leaves=63, subsample=0.8, subsample_freq=1,
-                           colsample_bytree=0.8, n_jobs=N_JOBS, random_state=SEED, verbose=-1)
+    p = LGBM_DEFAULTS | params
+    m = lgb.LGBMClassifier(**p, n_jobs=N_JOBS, random_state=SEED, verbose=-1)
     m.fit(X.iloc[tr], y[tr], eval_set=[(X.iloc[va], y[va])], callbacks=[lgb.early_stopping(30, verbose=False)])
     return Prob(m)
 

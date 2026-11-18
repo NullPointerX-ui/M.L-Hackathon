@@ -33,3 +33,12 @@ Round 1 state is tagged `round1-demo`; Round 1 outputs are untouched; Round 2 ou
 - Selection (rule pre-registered in `selection_rule_v2.json`): LightGBM, XGBoost, RandomForest within 0.005 CV Top-1 ->
   deferred to Phase 5 (HMM); provisional pick for HPO: LightGBM (`selection_v2.json`).
 - Not run (deadline cut): KNN, ExtraTrees, XGBRanker (code exists in `src/pathsnap/models/zoo.py`).
+
+## Phase 4 - HPO (done)
+- Optuna TPE (seed 42) on LightGBM, 10 trials (5 complete, 5 pruned by MedianPruner), GroupKFold(3) by trip, n_jobs 4,
+  timeout 480 s; HPO compute 252 s (`results/r2/hpo_trials.csv`, `hpo_best.json`, `optuna.db`, `reports/figures/r2/hpo_history.png`).
+- Tuned vs untuned, both refit on all 1,519,806 eligible train rows (`results/r2/hpo_tuned_vs_untuned.csv`):
+  CV Top-1 0.9151 vs 0.9144; ST Top-1 0.8944 vs 0.8976; ST macro-F1 0.9393 vs 0.9402; ST log loss 0.0579 vs 0.0570;
+  inference 540 vs 18.7 ms / 1k points.
+- Rule (CV Top-1) selects TUNED for the HMM. Note: the CV gain (+0.0007) is well inside the fold std (0.014) and tuned is
+  29x slower; student_test was not used to choose.
