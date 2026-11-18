@@ -10,7 +10,7 @@
         "gamma": 1.0221265332484575,
         "reg_lambda": 5.852327731091001
     },
-    "device": "cuda",
+    "device": "cpu",
     "seed": 42,
     "trials": 20
 }
