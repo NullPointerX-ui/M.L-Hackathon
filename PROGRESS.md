@@ -76,3 +76,5 @@ Round 1 state is tagged `round1-demo`; Round 1 outputs are untouched; Round 2 ou
   demo with firewall/IP steps, structure). `scripts/run_all_r2.py` (Round 1 `run_all.py` unchanged). optuna pinned.
 - Live check: API on 0.0.0.0:8000 served /health, /trips, /predict (859 ms for 00000065) and logged the evaluator line;
   Streamlit UI served HTTP 200 on 8501.
+
+- Round 2 report generator, summary, and findings completed and committed.
