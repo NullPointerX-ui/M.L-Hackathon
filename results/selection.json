@@ -1,7 +1,7 @@
 {
   "selected": "XGBoost",
   "rule": "max CV observation Top-1 (GroupKFold 5 by trip); CV log loss breaks ties within 0.001",
-  "cv_top1": 0.8232865903107912,
+  "cv_top1": 0.8232507429426408,
   "baseline_nearest_arc": {
     "Model": "Baseline: nearest arc (not a model)",
     "Algorithm Family": "Heuristic",
@@ -12,5 +12,5 @@
   },
   "xgb_device": "cuda",
   "seed": 42,
-  "total_runtime_s": 574.175270318985
+  "total_runtime_s": 1034.2701773643494
 }
