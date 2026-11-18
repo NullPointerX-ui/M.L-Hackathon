@@ -87,7 +87,7 @@ if reload_trips:
 
 # ------------------------------------------------------------------- trips ---
 st.title("PathSnap - GPS map matching")
-st.caption("Classifier (LightGBM) + HMM/Viterbi. Ground truth stays on the API server; only aggregate metrics come back.")
+st.caption("Classifier (XGBoost) + HMM/Viterbi. Ground truth stays on the API server; only aggregate metrics come back.")
 
 if "trips" not in st.session_state:
     try:
