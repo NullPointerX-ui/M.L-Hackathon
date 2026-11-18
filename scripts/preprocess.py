@@ -116,7 +116,7 @@ def main():
                 invalid=("invalid_coords", "sum"), nonmono=("non_monotonic_ts", "sum"),
                 route_disconnected=("route_connected", lambda s: int((~s).sum())),
                 route_repeats=("route_repeats", "sum")).to_string())
-    print("UTM EPSG codes:", sorted(inv.epsg.unique()))
+    print(f"UTM zones: {inv.epsg.nunique()} distinct EPSG codes:", ", ".join(str(int(e)) for e in sorted(inv.epsg.unique())))
     print("failures:", fails or "none")
 
 
