@@ -16,6 +16,11 @@ Run: python scripts\\r2_model_comparison.py   (~15 min)
 """
 from __future__ import annotations
 
+import os as _os
+
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):  # thermal limit: <= 4 threads
+    _os.environ.setdefault(_v, "4")
+
 import sys as _sys
 from pathlib import Path as _Path
 
@@ -50,6 +55,8 @@ RES, FIG = ROOT / "results" / "r2", ROOT / "reports" / "figures" / "r2"
 SEED, EPS = 42, 1e-6
 N_POINTS = json.loads((RES / "train_size_decision.json").read_text())["shared_train_points_per_fit"]
 FEATS = json.loads((RES / "feature_set_v2.json").read_text())["features"]
+# deadline scope (12:30 decision): exactly these 5 models, run one at a time
+MODELS = ["LogisticRegression", "RandomForest", "LightGBM", "XGBoost", "MLP"]
 RULE = dict(
     primary="CV observation Top-1 on eligible train points (GroupKFold(5) by trip)",
     tie_band=0.005,
@@ -124,7 +131,9 @@ def main():
                                 {t: segs[(part, t)] for t in pred.trip_id.unique()})
 
     rows, fold_rows, oof_store, models_final = [], [], {}, {}
-    for spec in zoo.ZOO:
+    run = [s for s in zoo.ZOO if s.name in MODELS]
+    print("models:", [s.name for s in run], "| n_jobs:", zoo.N_JOBS, "| features:", len(FEATS), flush=True)
+    for spec in run:
         try:
             knn = spec.name == "KNN"
             t0 = time.time(); fm = []

@@ -24,3 +24,12 @@ Round 1 state is tagged `round1-demo`; Round 1 outputs are untouched; Round 2 ou
 ## Phase 3 - model comparison (in progress)
 - Scope cut for the deadline: exactly 5 models (LogisticRegression, RandomForest, LightGBM, XGBoost, MLP),
   same 36,000-point sample per fit, same 31 features, GroupKFold(5) by trip, n_jobs <= 4.
+- Done (commit below), runtime 640 s, n_jobs 4. `results/r2/model_comparison_v2.csv` (deliverables 3.1 columns),
+  `model_comparison_v2_full.csv`, `cv_folds_v2.csv`, `calibration_v2.csv`, figures in `reports/figures/r2/*_v2.png`.
+- CV Top-1 (eligible) / train-fold / student_test Top-1: LightGBM 0.9123 / 0.9398 / 0.8981; XGBoost 0.9117 / 0.9390 / 0.8994;
+  RandomForest 0.9092 / 0.9342 / 0.8973; MLP 0.9053 / 0.9301 / 0.9059; LogisticRegression 0.8960 / 0.8985 / 0.8756.
+- Overfit check: largest train-CV gap 2.75 pts (LightGBM); none > 5 pts.
+- Isotonic calibration (inside CV) did not help: CV log loss LightGBM 0.0583 -> 0.0595, XGBoost 0.0578 -> 0.0596. Use raw probabilities.
+- Selection (rule pre-registered in `selection_rule_v2.json`): LightGBM, XGBoost, RandomForest within 0.005 CV Top-1 ->
+  deferred to Phase 5 (HMM); provisional pick for HPO: LightGBM (`selection_v2.json`).
+- Not run (deadline cut): KNN, ExtraTrees, XGBRanker (code exists in `src/pathsnap/models/zoo.py`).

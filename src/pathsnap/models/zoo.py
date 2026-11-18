@@ -18,6 +18,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 SEED = 42
+N_JOBS = 4  # thermal limit: never more than 4 parallel workers
 XGB_DEVICE = {"device": "cuda"}
 
 
@@ -57,17 +58,17 @@ def fit_logreg(X, y, g, pk):
 
 
 def fit_knn(X, y, g, pk):
-    return Prob(_imp_scale(KNeighborsClassifier(n_neighbors=25, weights="distance", n_jobs=-1)).fit(X, y))
+    return Prob(_imp_scale(KNeighborsClassifier(n_neighbors=25, weights="distance", n_jobs=N_JOBS)).fit(X, y))
 
 
 def fit_rf(X, y, g, pk):
     return Prob(make_pipeline(SimpleImputer(strategy="median"), RandomForestClassifier(
-        n_estimators=200, max_depth=20, min_samples_leaf=5, n_jobs=-1, random_state=SEED)).fit(X, y))
+        n_estimators=200, max_depth=20, min_samples_leaf=5, n_jobs=N_JOBS, random_state=SEED)).fit(X, y))
 
 
 def fit_et(X, y, g, pk):
     return Prob(make_pipeline(SimpleImputer(strategy="median"), ExtraTreesClassifier(
-        n_estimators=300, max_depth=24, min_samples_leaf=3, n_jobs=-1, random_state=SEED)).fit(X, y))
+        n_estimators=300, max_depth=24, min_samples_leaf=3, n_jobs=N_JOBS, random_state=SEED)).fit(X, y))
 
 
 def fit_mlp(X, y, g, pk):
@@ -78,7 +79,7 @@ def fit_mlp(X, y, g, pk):
 def fit_lgbm(X, y, g, pk):
     tr, va = _holdout(g)
     m = lgb.LGBMClassifier(n_estimators=500, learning_rate=0.05, num_leaves=63, subsample=0.8, subsample_freq=1,
-                           colsample_bytree=0.8, n_jobs=-1, random_state=SEED, verbose=-1)
+                           colsample_bytree=0.8, n_jobs=N_JOBS, random_state=SEED, verbose=-1)
     m.fit(X.iloc[tr], y[tr], eval_set=[(X.iloc[va], y[va])], callbacks=[lgb.early_stopping(30, verbose=False)])
     return Prob(m)
 
@@ -87,7 +88,7 @@ def fit_xgb(X, y, g, pk, **params):
     tr, va = _holdout(g)
     p = dict(n_estimators=500, learning_rate=0.05, max_depth=8, subsample=0.8, colsample_bytree=0.8)
     p.update(params)
-    m = xgb.XGBClassifier(**p, tree_method="hist", device=XGB_DEVICE["device"], early_stopping_rounds=30,
+    m = xgb.XGBClassifier(**p, tree_method="hist", n_jobs=N_JOBS, device=XGB_DEVICE["device"], early_stopping_rounds=30,
                           eval_metric="logloss", random_state=SEED)
     m.fit(X.iloc[tr], y[tr], eval_set=[(X.iloc[va], y[va])], verbose=False)
     return Prob(m)
@@ -99,7 +100,7 @@ def fit_xgb_ranker(X, y, g, pk):
     X, y, g, pk = X.iloc[o], y[o], g[o], pk[o]
     tr, va = _holdout(g)
     m = xgb.XGBRanker(objective="rank:pairwise", n_estimators=500, learning_rate=0.05, max_depth=8, subsample=0.8,
-                      colsample_bytree=0.8, tree_method="hist", device=XGB_DEVICE["device"],
+                      colsample_bytree=0.8, tree_method="hist", n_jobs=N_JOBS, device=XGB_DEVICE["device"],
                       early_stopping_rounds=30, eval_metric="ndcg@1", random_state=SEED)
     m.fit(X.iloc[tr], y[tr], qid=pk[tr], eval_set=[(X.iloc[va], y[va])], eval_qid=[pk[va]], verbose=False)
     return Rank(m)
