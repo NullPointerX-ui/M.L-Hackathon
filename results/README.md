@@ -2,13 +2,9 @@
 
 Every file here is written by a script in `scripts/`; no numbers are typed by hand.
 
-## Start here
-| File | What it is |
-|---|---|
-| `r2/ROUND2_SUMMARY.md` | Round 2 summary (final pipeline: classifier + HMM) |
-| `r2/FINDINGS.md` | Round 2 facts per report section, each with its source file |
-| `r2/summary_table.md` | Final results table (also in the main README) |
-| `ROUND1_SUMMARY.md` | Round 1 summary |
+Human-readable reports (main PDF, Round 1 and Round 2 summaries, findings, progress log) are in
+[`../reports/`](../reports/). This folder holds the raw outputs they are built from.
+`r2/summary_table.md` is the final results table (also embedded in the main README).
 
 ## Round 1 (top level and `eda/`)
 | File | What it is |

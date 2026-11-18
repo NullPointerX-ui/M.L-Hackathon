@@ -18,7 +18,7 @@ outputs to `results/`, `reports/`, `maps/` or `artifacts/`.
 | 3 | `build_features.py` | candidates + 13 features |
 | 3b | `eda_plots.py` | EDA and feature figures, `reports/figures/eda_*.png` |
 | 4 | `train_models.py` | 6-model comparison, `results/model_comparison.csv` |
-| 5 | `write_summary.py` | `results/ROUND1_SUMMARY.md` |
+| 5 | `write_summary.py` | `results/ROUND1_SUMMARY.md` (committed copy in `reports/round1/`) |
 | - | `optuna_tuning.py` | Optuna XGBoost tuning on Round 1 features (`results/optuna_*.json/csv`) |
 
 ## Round 2 (in order)
@@ -34,6 +34,6 @@ outputs to `results/`, `reports/`, `maps/` or `artifacts/`.
 | 5 | `r2_hmm.py` | HMM/Viterbi, classifier vs HMM `hmm_comparison.csv` |
 | 6 | `r2_export_artifacts.py` | `artifacts/r2/*`, inference stress test |
 | 7 | `r2_make_maps.py` | `maps/r2/*.html` |
-| 8 | `r2_summary_table.py`, `r2_write_summary.py` | `summary_table.md`, `ROUND2_SUMMARY.md`, `FINDINGS.md` |
+| 8 | `r2_summary_table.py`, `r2_write_summary.py` | `summary_table.md`; `ROUND2_SUMMARY.md` + `FINDINGS.md` (committed copies in `reports/round2/`) |
 
 `r2_common.py` holds shared loaders; `__init__.py` puts `src/` on the import path.

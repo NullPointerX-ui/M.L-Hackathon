@@ -6,8 +6,9 @@ on a second laptop. Round 1 covered preprocessing, labels, features and a 6-mode
 cleaner labels, new features, Bayesian HPO, the HMM, the API and the UI.
 
 **Final result (Round 2):** see the [results table](#results-generated-by-scriptsr2_summary_tablepy-from-resultsr2),
-[results/r2/ROUND2_SUMMARY.md](results/r2/ROUND2_SUMMARY.md) and [results/r2/FINDINGS.md](results/r2/FINDINGS.md).
-**Round 1:** [results/ROUND1_SUMMARY.md](results/ROUND1_SUMMARY.md). Decision log: [PROGRESS.md](PROGRESS.md).
+[reports/round2/ROUND2_SUMMARY.md](reports/round2/ROUND2_SUMMARY.md) and [reports/round2/FINDINGS.md](reports/round2/FINDINGS.md).
+**Main report (PDF):** [reports/PathSnap_Report.pdf](reports/PathSnap_Report.pdf).
+**Round 1:** [reports/round1/ROUND1_SUMMARY.md](reports/round1/ROUND1_SUMMARY.md). Decision log: [reports/round2/PROGRESS.md](reports/round2/PROGRESS.md).
 
 ## Repository map
 
@@ -20,8 +21,8 @@ cleaner labels, new features, Bayesian HPO, the HMM, the API and the UI.
 | [`tools/`](tools/) | Connection smoke test, fake-trip generator |
 | [`tests/`](tests/) | Geometry, label alignment, Viterbi, no-label-import, API smoke tests |
 | [`artifacts/r2/`](artifacts/r2/) | Deployed model (`xgb_selected.json`), feature spec, HMM config, versions |
-| [`results/`](results/) | Every metric/table as CSV/JSON + summaries - see [results/README.md](results/README.md) |
-| [`reports/`](reports/) | Figures (`figures/`, `figures/r2/`) and UI screenshots - see [reports/README.md](reports/README.md) |
+| [`results/`](results/) | Every metric/table as CSV/JSON (raw outputs) - see [results/README.md](results/README.md) |
+| [`reports/`](reports/) | **Main report PDF**, `round1/` and `round2/` summaries, findings, progress log, UI screenshots, figures - see [reports/README.md](reports/README.md) |
 | [`maps/`](maps/) | Interactive Folium maps (`maps/r2/`: best, median, worst student_test trip) |
 | [`docs/`](docs/) | Hackathon rules (converted from the PDFs), demo runbook, model notes |
 | `requirements*.txt` | `requirements.txt` (pipeline), `requirements-api.txt` (laptop 1), `requirements-ui.txt` (laptop 2) |
@@ -45,7 +46,7 @@ cd M.L-Hackathon
 
 ```powershell
 py -3.12 -m venv .venv
-.venvScriptsActivate.ps1
+.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 ```
 
@@ -74,8 +75,8 @@ Copy it in with **one** of these. Replace the path with wherever your copy is. T
 
 ```powershell
 # a) you have a folder (e.g. from a shared drive or a teammate) that contains train and student_test
-New-Item -ItemType Directory -Force dataraw | Out-Null
-Copy-Item -Recurse "C:pathtodatasettrain", "C:pathtodatasetstudent_test" dataraw
+New-Item -ItemType Directory -Force data\raw | Out-Null
+Copy-Item -Recurse "C:pathtodatasettrain", "C:pathtodatasetstudent_test" data\raw
 
 # b) you have a zip: extract it, then copy the train and student_test folders as in (a)
 Expand-Archive "C:pathtodataset.zip" -DestinationPath tmp_data
@@ -87,15 +88,15 @@ Get-ChildItem tmp_data -Recurse -Directory -Filter train   # shows where train e
 Check it:
 
 ```powershell
-(Get-ChildItem datarawtrain -Directory).Count          # 80
-(Get-ChildItem datarawstudent_test -Directory).Count   # 10
+(Get-ChildItem data\rawtrain -Directory).Count          # 80
+(Get-ChildItem data\raw\student_test -Directory).Count   # 10
 ```
 
 ### 4. Check that everything works
 
 ```powershell
 python -m pytest -q tests        # expect: 2 passed
-python scriptsdemo.py --no-open # prints the committed Round 1 results (works even before step 3)
+python scripts\demo.py --no-open # prints the committed Round 1 results (works even before step 3)
 ```
 
 ---
@@ -106,19 +107,19 @@ Run from the repo root with the venv active. Both forms work: `python scripts<na
 
 | Command | What it does | Time |
 |---|---|---|
-| `python scriptsrun_all.py --skip-train` | Steps 1, 2, 3, 5: rebuild data, labels and features; reuse committed model results | ~1.5 min |
-| `python scriptsrun_all.py` | Everything, including training all 6 models | ~12 min |
-| `python scriptsdemo.py` | Print Round 1 numbers, open the map and figures | 10 s |
+| `python scripts\run_all.py --skip-train` | Steps 1, 2, 3, 5: rebuild data, labels and features; reuse committed model results | ~1.5 min |
+| `python scripts\run_all.py` | Everything, including training all 6 models | ~12 min |
+| `python scripts\demo.py` | Print Round 1 numbers, open the map and figures | 10 s |
 
 Individual steps, in order (each depends on the previous one):
 
 | Step | Command | Writes |
 |---|---|---|
-| 1. Load, project, quality checks, map | `python scriptspreprocess.py` | `results/eda/inventory.csv`, `maps/trip_00000001_raw.html`, `data/processed/points_*.parquet` |
-| 2. Per-point labels (monotonic DP) | `python scriptsmake_labels.py` | `data/processed/labels_*.parquet`, `results/eda/label_*.{csv,json}` |
-| 3. Candidates + features | `python scriptsbuild_features.py` | `data/processed/*_feats.parquet`, `results/eda/candidates.json` |
-| 4. Train + compare models | `python scriptstrain_models.py` | `results/model_comparison.csv`, `results/experiments.csv`, `reports/figures/*.png` |
-| 5. Summary | `python scriptswrite_summary.py` | `results/ROUND1_SUMMARY.md` |
+| 1. Load, project, quality checks, map | `python scripts\preprocess.py` | `results/eda/inventory.csv`, `maps/trip_00000001_raw.html`, `data/processed/points_*.parquet` |
+| 2. Per-point labels (monotonic DP) | `python scripts\make_labels.py` | `data/processed/labels_*.parquet`, `results/eda/label_*.{csv,json}` |
+| 3. Candidates + features | `python scripts\build_features.py` | `data/processed/*_feats.parquet`, `results/eda/candidates.json` |
+| 4. Train + compare models | `python scripts\train_models.py` | `results/model_comparison.csv`, `results/experiments.csv`, `reports/figures/*.png` |
+| 5. Summary | `python scripts\write_summary.py` | `results/ROUND1_SUMMARY.md` (committed copy: `reports/round1/`) |
 
 Notes:
 
@@ -144,7 +145,7 @@ src/pathsnap/
   labels/align.py  ground truth: monotonic DP alignment of points to the ordered route
 scripts/           pipeline steps (above), run_all.py, demo.py
 tests/             label alignment + geometry tests on toy data
-results/           every number we report (CSV/JSON + ROUND1_SUMMARY.md + training log)
+results/           every number we report (CSV/JSON + training log)
 reports/figures/   plots generated by train_models.py
 maps/              Folium maps
 docs/              hackathon rules converted from pdfs/ - read before changing anything
@@ -188,14 +189,14 @@ GPS point. Ground truth (`.route`) is read only by `src/pathsnap/labels/` and `s
 Inference: largest trip (19,313 points) 13.1 s; student_test trips max 1.02 s.
 Sources: results/r2/model_comparison_v2_full.csv, hmm_comparison.csv, inference_check.csv. 'reliable' = points within 50 m of the reference route in trips with label_quality ok.
 
-Step-by-step log of decisions and numbers: [PROGRESS.md](PROGRESS.md). Figures: `reports/figures/r2/`. Maps: `maps/r2/`.
+Step-by-step log of decisions and numbers: [reports/round2/PROGRESS.md](reports/round2/PROGRESS.md). Figures: `reports/figures/r2/`. Maps: `maps/r2/`.
 
 ### Reproduce
 
 ```powershell
-python scriptsrun_all.py --skip-train     # Round 1 data steps (labels, candidates, features)
-python scriptsrun_all_r2.py --quick       # Round 2: labels v2, features v2, HMM, artifacts, maps (~8 min)
-python scriptsrun_all_r2.py               # everything incl. ablation, model comparison, HPO (~45 min)
+python scripts\run_all.py --skip-train     # Round 1 data steps (labels, candidates, features)
+python scripts\run_all_r2.py --quick       # Round 2: labels v2, features v2, HMM, artifacts, maps (~8 min)
+python scripts\run_all_r2.py               # everything incl. ablation, model comparison, HPO (~45 min)
 python -m pytest -q tests                  # geometry, alignment, Viterbi (incl. break/restart), no-label-import, API smoke
 ```
 
@@ -204,9 +205,9 @@ python -m pytest -q tests                  # geometry, alignment, Viterbi (incl.
 **Laptop 1 (API).** The model is loaded once at startup; ground truth stays on this laptop.
 
 ```powershell
-.venvScriptsActivate.ps1
+.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt -r requirements-api.txt
-python apimain.py --eval-dir datarawstudent_test --port 8000     # evaluators: --eval-dir <their folder>
+python api\main.py --eval-dir data\raw\student_test --port 8000     # evaluators: --eval-dir <their folder>
 ```
 
 1. Find this laptop's IPv4 on the shared network: `ipconfig` (use the hotspot/Wi-Fi adapter's address).
@@ -219,12 +220,12 @@ python apimain.py --eval-dir datarawstudent_test --port 8000     # evaluators: -
 
 ```powershell
 python -m pip install -r requirements-ui.txt
-streamlit run uiapp.py
+streamlit run ui\app.py
 ```
 
 In the sidebar set **API base URL** to `http://<laptop-1-IP>:8000`, press **Check API**, pick a trip, **Run prediction**.
 Map layers: HMM route (purple), classifier-only route (dashed, toggle), GPS points coloured by confidence.
-If it can't connect: `python toolssmoke_test.py http://<laptop-1-IP>:8000` from laptop 2, and `ping <laptop-1-IP>`
+If it can't connect: `python tools\smoke_test.py http://<laptop-1-IP>:8000` from laptop 2, and `ping <laptop-1-IP>`
 (phone hotspots with client isolation block laptop-to-laptop traffic).
 
 API: `GET /health`, `GET /trips`, `POST /predict {"trip_id": "..."}` -> GeoJSON (raw GPS, HMM route, classifier-only route,
@@ -255,5 +256,5 @@ results/r2/ reports/figures/r2/ maps/r2/   all Round 2 outputs (Round 1 outputs 
 - [Round 2 Summary][r2summary]
 - [Round 2 Findings][r2findings]
 
-[r2summary]: results/r2/ROUND2_SUMMARY.md
-[r2findings]: results/r2/FINDINGS.md
+[r2summary]: reports/round2/ROUND2_SUMMARY.md
+[r2findings]: reports/round2/FINDINGS.md
