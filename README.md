@@ -1,12 +1,32 @@
 # PathSnap: map-matching noisy GPS to the road network
 
 UE24CS352A Machine Learning hackathon (PES University). We match each GPS point of a trip to the road arc the
-vehicle was on. Round 1 covers preprocessing, labels, candidate generation, features and a 6-model comparison.
-HMM/Viterbi, Bayesian HPO, the API and the UI come in Round 2.
+vehicle was on: candidate roads -> features -> classifier (XGBoost) -> HMM/Viterbi -> FastAPI server -> Streamlit UI
+on a second laptop. Round 1 covered preprocessing, labels, features and a 6-model comparison; Round 2 added
+cleaner labels, new features, Bayesian HPO, the HMM, the API and the UI.
 
-**Round 1 result:** XGBoost selected, 0.823 CV Top-1 / 0.860 student_test Top-1 (nearest-arc baseline: 0.51).
-**Round 2 (final):** classifier + HMM/Viterbi, FastAPI + Streamlit two-laptop demo. See [Round 2](#round-2-classifier--hmm--api--ui) below and [PROGRESS.md](PROGRESS.md).
-Full write-up: [results/ROUND1_SUMMARY.md](results/ROUND1_SUMMARY.md). Rules and specs: [docs/](docs/).
+**Final result (Round 2):** see the [results table](#results-generated-by-scriptsr2_summary_tablepy-from-resultsr2),
+[results/r2/ROUND2_SUMMARY.md](results/r2/ROUND2_SUMMARY.md) and [results/r2/FINDINGS.md](results/r2/FINDINGS.md).
+**Round 1:** [results/ROUND1_SUMMARY.md](results/ROUND1_SUMMARY.md). Decision log: [PROGRESS.md](PROGRESS.md).
+
+## Repository map
+
+| Folder | What's in it |
+|---|---|
+| [`src/pathsnap/`](src/pathsnap/) | The library: loading/projection, candidates, features, labels (ground truth), models, HMM, inference, evaluation |
+| [`scripts/`](scripts/) | One script per pipeline step, plus `run_all.py` (Round 1), `run_all_r2.py` (Round 2), `demo.py` - see [scripts/README.md](scripts/README.md) |
+| [`api/`](api/) | FastAPI server (laptop 1) |
+| [`ui/`](ui/) | Streamlit UI (laptop 2) |
+| [`tools/`](tools/) | Connection smoke test, fake-trip generator |
+| [`tests/`](tests/) | Geometry, label alignment, Viterbi, no-label-import, API smoke tests |
+| [`artifacts/r2/`](artifacts/r2/) | Deployed model (`xgb_selected.json`), feature spec, HMM config, versions |
+| [`results/`](results/) | Every metric/table as CSV/JSON + summaries - see [results/README.md](results/README.md) |
+| [`reports/`](reports/) | Figures (`figures/`, `figures/r2/`) and UI screenshots - see [reports/README.md](reports/README.md) |
+| [`maps/`](maps/) | Interactive Folium maps (`maps/r2/`: best, median, worst student_test trip) |
+| [`docs/`](docs/) | Hackathon rules (converted from the PDFs), demo runbook, model notes |
+| `requirements*.txt` | `requirements.txt` (pipeline), `requirements-api.txt` (laptop 1), `requirements-ui.txt` (laptop 2) |
+
+`data/` (raw trips, derived parquet files) is not in git; see Setup step 3.
 
 ---
 
